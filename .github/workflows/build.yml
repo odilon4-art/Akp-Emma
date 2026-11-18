@@ -62,6 +62,32 @@ jobs:
           name: Pharmacie-Windows
           path: Pharmacie-Windows.zip
 
+  patient-pc:
+    name: Patient (.exe Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Installer les dependances
+        working-directory: Patient
+        run: python -m pip install -r requirements.txt
+      - name: Construire OrdonnanceMobilePatient.exe
+        working-directory: Patient
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name OrdonnanceMobilePatient --icon icon.ico --add-data "app;app" --hidden-import backend main.py
+      - name: Preparer le dossier a telecharger
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path out/Patient/dist | Out-Null
+          Copy-Item Patient/dist/OrdonnanceMobilePatient.exe out/Patient/dist/
+          Copy-Item Patient/icon.ico, Patient/Installer.bat, Patient/installer.ps1, Patient/Lancer_RESEAU.bat, Patient/Lancer_DEMO_RESEAU.bat, Patient/LISEZ-MOI.txt out/Patient/
+          Compress-Archive -Path out/Patient -DestinationPath Patient-Windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Patient-Windows
+          path: Patient-Windows.zip
+
   patient-android:
     name: Patient (.apk Android)
     runs-on: ubuntu-latest
@@ -89,7 +115,7 @@ jobs:
 
   publier:
     name: Publier les fichiers (page Releases)
-    needs: [hopital, pharmacie, patient-android]
+    needs: [hopital, pharmacie, patient-pc, patient-android]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -107,3 +133,4 @@ jobs:
             fichiers/OrdonnanceMobile-Patient.apk
             fichiers/Hopital-Windows.zip
             fichiers/Pharmacie-Windows.zip
+            fichiers/Patient-Windows.zip

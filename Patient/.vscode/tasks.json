@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1. Installer les dépendances",
+      "type": "shell",
+      "command": "${command:python.interpreterPath} -m pip install -r requirements.txt",
+      "problemMatcher": []
+    },
+    {
+      "label": "2. Construire l'exécutable (.exe)",
+      "type": "shell",
+      "command": "${command:python.interpreterPath} -m PyInstaller --noconfirm --onefile --windowed --name OrdonnanceMobilePatient --icon icon.ico --add-data \"app${pathSeparator}app\" main.py",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    }
+  ]
+}

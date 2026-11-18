@@ -1,0 +1,46 @@
+ORDONNANCE MOBILE PATIENT - VERSION PC (Python, 100 % locale, sans Internet)
+
+C'est le 3e logiciel de la famille : Hopital + Pharmacie + Patient. Les trois utilisent LA MEME BASE
+(C:\Users\<vous>\.ordonnance_mobile\donnees) : ils fonctionnent de paire sur le meme ordinateur.
+
+  Patient   : cree son carnet, cherche un hopital ouvert, paie et suit son tour, recoit son ordonnance,
+              cherche et commande ses medicaments, note l'hopital et la pharmacie.
+  Hopital   : voit le rendez-vous paye dans la file, prend les constantes, le medecin envoie l'ordonnance
+              et les reponses aux resultats d'analyses -> le patient les recoit dans son Carnet / Ordonnance.
+  Pharmacie : voit la commande du patient (code de retrait a 6 chiffres), la delivre -> statut mis a jour chez le patient.
+  Les logiciels peuvent etre ouverts en meme temps (ports 8765 hopital, 8767 pharmacie, 8769 patient ; 8766/8768/8770 en demo).
+  Mise a jour en direct : les changements d'un logiciel apparaissent chez les autres en quelques secondes.
+
+LANCER
+  python main.py            -> version PC (vraies donnees)       |  Lancer.bat
+  python main.py --demo     -> DEMO partagee avec Hopital et Pharmacie (--demo aussi)  |  Lancer_DEMO.bat
+  Fenetre de la taille d'un telephone ; si la fenetre integree est impossible, le navigateur s'ouvre.
+
+DEMO : patients prets (code secret 123456) - bouton "Mode demo" en bas a droite
+  90111111  90222222  90333333  90444444 (Mawuli : a une ordonnance a chercher en pharmacie)
+  Pour voir les trois ensemble : lancez Hopital (DEMO), Pharmacie (DEMO) et Patient (DEMO).
+  Comptes demo hopital : infirmier@demo.local / medecin@demo.local / admin@demo.local, pharmacie : pharmacien@demo.local (mot de passe Demo1234!)
+
+VERSION PC : premiers pas
+  1. Hopital : creer le compte, remplir la Fiche, Publier.   Pharmacie : idem (produits, stock, prix).
+  2. Patient : "Creer mon carnet" (telephone + code secret a 6 chiffres) ; l'hopital et la pharmacie publies apparaissent.
+  3. Mode "Especes" : le patient paie a l'accueil / a la pharmacie ; sinon paiement mobile money ou carte.
+
+PAIEMENTS : les modes proposes au patient sont ceux que l'hopital / la pharmacie ont coches
+  (Especes, Carte bancaire, Moov Money, Mixx By Yas, T-Money, Flooz).
+  Sur PC le paiement mobile money / carte est SIMULE (aucun argent n'est debite) : pas d'operateur connecte hors ligne.
+
+INSTALLER (equivalent d'un APK)
+  1. Double-clic sur build.bat       -> dist\OrdonnanceMobilePatient.exe  (2-3 min, construit hors OneDrive)
+  2. Double-clic sur Installer.bat   -> raccourcis Bureau "Ordonnance Mobile Patient" et "(DEMO)"
+  Desinstaller : %LOCALAPPDATA%\OrdonnanceMobilePatient\Desinstaller.bat
+  VS Code : py -m venv .venv | .venv\Scripts\activate | pip install -r requirements.txt | F5
+
+LIMITES
+- Un seul ordinateur : les donnees ne sont pas partagees entre plusieurs PC.
+- Paiements simules (voir ci-dessus). Code secret oublie : verification par nom, prenom et date de naissance (5 essais/heure).
+- Le personnel de l'hopital voit la liste des patients (necessaire a l'accueil).
+
+TELEPHONE ANDROID (APK) : lancez Lancer_RESEAU.bat (python main.py --reseau) : la fenetre affiche l'adresse a saisir dans l'APK. Projet Android et marche a suivre : dossier PatientAndroid (separe).
+
+FILIGRANE (v20) : logos en motif très discret derrière les écrans (section v20 de app/theme.css, variable --wm ; supprimer la section pour l'enlever).
