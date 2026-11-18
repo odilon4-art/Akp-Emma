@@ -67,11 +67,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-      - uses: android-actions/setup-android@v3
+      - name: Accepter les licences du SDK Android (deja installe sur la machine GitHub)
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKM=$(find "$ANDROID_HOME" -name sdkmanager -type f | head -1)
+          echo "sdkmanager=$SDKM"
+          yes | "$SDKM" --licenses > /dev/null || true
       - name: Construire l'APK
         working-directory: PatientAndroid
         run: |
