@@ -1,0 +1,62 @@
+ORDONNANCE MOBILE - VERSION PC (Python, 100 % locale, sans Internet)
+
+Cette version n'utilise plus Supabase : un serveur Python integre (backend.py) stocke tout
+dans une base SQLite sur votre PC. Comptes, mots de passe (haches), patients, ordonnances...
+
+DEUX MODES
+  F5 dans VS Code (ou  python main.py)         -> VERSION PC : vos vraies donnees, gardees sur le PC
+  F5 "Mode DEMO"  (ou  python main.py --demo)  -> DEMO : donnees fictives, effacees a chaque lancement
+  Double-clic : Lancer.bat  /  Lancer_DEMO.bat
+
+DEMO : comptes prets (mot de passe Demo1234!)
+  admin@demo.local   infirmier@demo.local   medecin@demo.local
+  Le bouton vert "Mode demo" en bas a droite remplit la connexion en un clic.
+
+VERSION PC : premiers pas
+  1. "Creer un compte" -> creez votre hopital -> remplissez la Fiche -> Publier
+  2. Onglet Personnel : creez les comptes infirmier et medecin
+  3. Bouton "Outils" -> Simulateur patient : creez des patients et des rendez-vous
+     (dans le vrai systeme ils viennent de l'application patient)
+  4. Mode de paiement (encaisser) -> Infirmerie (constantes) -> Medecin (ordonnance) -> Archives
+
+OU SONT LES DONNEES ?   C:\Users\<vous>\.ordonnance_mobile\donnees   (sauvegarde = copier ce dossier)
+
+INSTALLER SUR PC (equivalent d'un APK)
+  1. Double-clic sur build.bat        -> cree dist\OrdonnanceMobile.exe   (2-3 min)
+  2. Double-clic sur Installer.bat    -> installe + raccourcis Bureau "Ordonnance Mobile" et "(DEMO)"
+  (Option : installateur Setup.exe classique avec Inno Setup + installateur.iss)
+  Conseil : si le projet est dans OneDrive, copiez-le d'abord dans C:\dev\
+
+LIMITES DE CETTE VERSION
+- Un seul ordinateur : les donnees ne sont pas partagees entre plusieurs PC.
+- Le logiciel Patient existe maintenant (dossier Patient) : le simulateur reste utile pour les tests.
+- "Mot de passe oublie" par e-mail impossible : l'administrateur change le mot de passe (onglet Personnel).
+- Le simulateur de roles de l'ancienne version (superadmin) n'est pas reproduit.
+- L'ancien Supabase n'est plus utilise ; migration_feuilles_assurance.sql est conserve a titre de reference.
+
+AVEC VS CODE (rappel)
+  py -m venv .venv  |  .venv\Scripts\activate  |  pip install -r requirements.txt
+  Ctrl+Shift+P > Python: Select Interpreter > .venv
+
+NOUVEAU DESIGN (v12) : menu latéral avec compteurs de patients en attente, tickets numérotés (rouge si urgence),
+ écran de connexion repensé, thème clair/sombre automatique, polices du système (fonctionne sans Internet).
+ Fichier du style : app/theme.css  (couleurs et polices en tête de fichier).
+ Mise a jour : copier ce dossier (ou app/ + backend.py), puis  .\build.bat  et  .\Installer.bat
+
+LOCALISATION (v13) : champ unique pour coller les coordonnees ou un lien Google Maps, controle en direct (Togo), bouton Verifier sur la carte, champs obligatoires marques.
+
+PAIEMENTS (v14) : onglet Accueil renomme Mode de paiement ; modes ajoutes : Moov Money, Mixx By Yas (en plus d'Especes, Carte bancaire, T-Money, Flooz). Cochez-les dans Fiche > Prix et paiement.
+
+ERREUR "Could not load System.Windows.Forms" (v15) : le logiciel bascule maintenant tout seul sur le navigateur
+ (une petite fenetre "Quitter" s'affiche). Pour retrouver la fenetre integree : python -m pip install -U pywebview pythonnet
+ (ou utiliser Python 3.12), puis relancer. Sinon, rien a faire : le logiciel fonctionne dans le navigateur.
+
+CONSTRUCTION SUR LE BUREAU (v16) : build.bat cree l'environnement Python et les fichiers temporaires hors de OneDrive
+ (%LOCALAPPDATA%\om-build\hopital) puis copie le .exe dans dist\. Le projet peut rester sur le Bureau.
+ Si un ancien dossier .venv est abime : le supprimer (Remove-Item -Recurse -Force .venv), build.bat n'en a plus besoin.
+
+LOGICIEL PATIENT (v17) : Hopital, Pharmacie et Patient partagent la meme base sur le meme PC et se mettent a jour en direct. Demo commune : lancez les trois en mode DEMO ; patients 90111111...90444444, code 123456.
+
+DESIGN (v19) : style « CoachPro » (cadre en verre sur fond dégradé, menu latéral, grand titre, cartes douces). Couleurs : variables en tête de la section v19 de app/theme.css.
+
+FILIGRANE (v20) : logos en motif très discret derrière les écrans (section v20 de app/theme.css, variable --wm ; supprimer la section pour l'enlever).

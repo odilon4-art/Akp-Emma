@@ -1,0 +1,34 @@
+APPLICATION ANDROID (.apk) - ORDONNANCE MOBILE PATIENT
+
+PRINCIPE
+  Le telephone ne contient pas la base de donnees : l'APK est une fenetre qui affiche le logiciel Patient
+  tournant sur le PC (le meme PC que Hopital et Pharmacie, donc tout reste synchronise).
+  Telephone et PC doivent etre sur le MEME Wi-Fi.
+
+1) SUR LE PC
+   - Dossier Patient : double-clic sur  Lancer_RESEAU.bat   (ou: python main.py --reseau)
+     Une fenetre affiche l'adresse a saisir sur le telephone, par exemple  192.168.1.20:8769
+   - Pare-feu Windows : si une alerte apparait, cochez "Reseaux prives" > Autoriser.
+   - Laissez Hopital / Pharmacie ouverts comme d'habitude (meme base).
+   - DEMO : python main.py --demo --reseau (port 8770).
+
+2) CONSTRUIRE L'APK (une seule fois, sur le PC)
+   - Installez Android Studio (gratuit) : developer.android.com/studio
+   - File > Open > choisissez ce dossier PatientAndroid, attendez la fin de "Gradle sync" (Internet requis).
+   - Menu Build > Build Bundle(s) / APK(s) > Build APK(s)
+   - Clic sur "locate" : app\build\outputs\apk\debug\app-debug.apk
+   - Envoyez ce fichier sur le telephone (USB, Bluetooth, WhatsApp...) et ouvrez-le
+     (autoriser "Installer des applications inconnues" si le telephone le demande).
+   En ligne de commande (SDK + JDK 17 installes) :  gradlew.bat assembleDebug
+
+3) PREMIER LANCEMENT
+   - Saisissez l'adresse affichee sur le PC (192.168.x.x ; le port 8769 est ajoute tout seul), "Se connecter".
+   - L'adresse est gardee. Pour la changer : onglet Carnet > "Changer l'adresse du PC".
+   - Si le PC change d'adresse (autre Wi-Fi) : meme manip.
+
+LIMITES
+   - Le PC doit etre allume avec le logiciel Patient lance en mode reseau. Pas d'acces hors du Wi-Fi.
+   - Mode reseau = les appareils du meme Wi-Fi peuvent atteindre le logiciel : n'utilisez pas un Wi-Fi public.
+     (Les comptes restent proteges par leurs codes/mots de passe.)
+   - "Me localiser" : le telephone demande l'autorisation de position ; sinon choisir sa position a la main.
+   - Fichier debug : suffisant pour installer chez vous. Pour publier sur le Play Store il faudrait signer une version "release".

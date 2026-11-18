@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulateur patient — Ordonnance Mobile</title>
+<style>
+:root{color-scheme:light dark;--g:#0b6b52;--l:#8885}
+body{font:16px system-ui,Arial;margin:0}
+header{background:var(--g);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+header a{color:#fff;font-weight:700}
+main{max-width:860px;margin:auto;padding:14px}
+.c{border:1px solid var(--l);border-radius:12px;padding:14px;margin:12px 0}
+h1{font-size:1.3rem;margin:0}h2{font-size:1.05rem;margin:0 0 8px}
+label{display:block;font-weight:600;margin:8px 0}
+input,select,textarea{width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--l);border-radius:8px;font:inherit;margin-top:4px;background:Canvas;color:CanvasText}
+button{background:var(--g);color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer;margin-top:8px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+#msg{padding:10px;border-radius:8px;background:#16845d22;margin:10px 0}.bad{background:#b91c1c22!important}
+small{opacity:.75}
+</style></head><body>
+<header><b>🧪 Simulateur patient</b><a href="index.html">← Retour à l'application</a></header>
+<main>
+<p><small>Dans la vraie application, les patients et leurs rendez-vous viennent de l'application patient. Ici, vous les créez à la main pour tester : accueil → infirmerie → médecin → ordonnance.</small></p>
+<div id="msg" hidden></div>
+
+<div class="c"><h2>1. Nouveau patient</h2>
+<div class="row"><label>Prénom<input id="pp"></label><label>Nom<input id="pn"></label><label>Âge<input id="pa" type="number" min="0" max="120"></label>
+<label>Sexe<select id="ps"><option>F</option><option>M</option></select></label>
+<label>Téléphone<input id="pt"></label><label>Date de naissance<input id="pd" type="date"></label>
+<label>Assurance<select id="pas"></select></label><label>N° d'assuré<input id="pnu"></label></div>
+<button onclick="addPat()">Créer le patient</button></div>
+
+<div class="c"><h2>2. Nouveau rendez-vous</h2>
+<div class="row"><label>Établissement<select id="rh" onchange="fillH()"></select></label>
+<label>Patient<select id="rp"></select></label>
+<label>Spécialité<select id="rs"></select></label>
+<label>Paiement<select id="rm"></select></label></div>
+<label>Symptômes<textarea id="rsy" rows="2"></textarea></label>
+<label>Urgence (laisser vide si aucune)<input id="ru" placeholder="ex. Douleur thoracique"></label>
+<button onclick="addRdv()">Créer le rendez-vous</button>
+<p><small>« Espèces » : le rendez-vous apparaît dans l'onglet Mode de paiement (à encaisser). Les autres modes sont payés tout de suite : le patient va directement à l'infirmerie.</small></p></div>
+
+<div class="c"><h2>3. Résultats d'analyses publiés</h2><div id="res"></div>
+<small>Quand un médecin publie un résultat, le patient doit le « soumettre » pour que le médecin puisse répondre.</small></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={hopitaux:[],patients:[],resultats:[]};
+async function api(p,b){const r=await fetch('/api/dev/'+p,{method:'POST',headers:{'X-OM':'1','Content-Type':'application/json'},body:JSON.stringify(b||{})});const j=await r.json();if(!r.ok)throw new Error(j.error||'Erreur');return j}
+function say(t,bad){const m=$('msg');m.hidden=false;m.textContent=t;m.className=bad?'bad':''}
+async function load(){
+  S=await api('info');
+  $('pas').innerHTML='<option value="">Aucune assurance</option>'+[...new Set(S.hopitaux.flatMap(h=>Object.keys(h.taux)))].map(a=>`<option>${esc(a)}</option>`).join('');
+  $('rh').innerHTML=S.hopitaux.map(h=>`<option value="${h.id}">${esc(h.nom)}${h.publie?'':' (non publié)'}</option>`).join('')||'<option value="">Aucun établissement : créez un compte d\'abord</option>';
+  $('rp').innerHTML=S.patients.map(p=>`<option value="${p.id}">${esc(p.prenom)} ${esc(p.nom)} — carnet ${esc(p.code_carnet)}</option>`).join('')||'<option value="">Créez un patient</option>';
+  fillH();
+  $('res').innerHTML=S.resultats.map(r=>`<div class="c"><b>${esc(r.titre)}</b> · ${esc(r.patient)}<br><small>${r.soumis_le?'Soumis par le patient':'Pas encore soumis'}${r.repondu_le?' · réponse du médecin envoyée':''}</small><br>${!r.soumis_le?`<button onclick="sub(${r.id})">Soumettre en tant que patient</button>`:''}</div>`).join('')||'<small>Aucun résultat publié.</small>';
+}
+function fillH(){const h=S.hopitaux.find(x=>x.id==$('rh').value)||{specialites:[],paiements:[]};
+  $('rs').innerHTML=(h.specialites.length?h.specialites:['Généraliste']).map(s=>`<option>${esc(s)}</option>`).join('');
+  $('rm').innerHTML=(h.paiements.length?h.paiements:['Espèces']).map(s=>`<option>${esc(s)}</option>`).join('')}
+async function addPat(){try{const p=await api('patient',{prenom:$('pp').value,nom:$('pn').value,age:+$('pa').value||null,sexe:$('ps').value,telephone:$('pt').value,date_naissance:$('pd').value,assurance:$('pas').value,numero_assure:$('pnu').value});say('Patient créé. Code de carnet : '+p.code_carnet);['pp','pn','pa','pt','pd','pnu'].forEach(i=>$(i).value='');await load()}catch(e){say(e.message,1)}}
+async function addRdv(){try{const r=await api('rdv',{hopital_id:$('rh').value,patient_id:$('rp').value,specialite:$('rs').value,mode_paiement:$('rm').value,symptomes:$('rsy').value,urgence:$('ru').value});say('Rendez-vous créé : n° de file '+r.numero_file+(r.paiement_statut=='paye'?' (payé : à l\'infirmerie)':' (à encaisser à l\'accueil)'));$('rsy').value='';$('ru').value=''}catch(e){say(e.message,1)}}
+async function sub(id){try{await api('soumettre',{id});say('Résultat soumis : le médecin peut maintenant répondre.');await load()}catch(e){say(e.message,1)}}
+load().catch(e=>say(e.message,1));
+</script></body></html>

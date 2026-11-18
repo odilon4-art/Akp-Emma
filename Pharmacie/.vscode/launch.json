@@ -1,0 +1,9 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    { "name": "Version PC (vraies données locales)", "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/main.py", "console": "integratedTerminal" },
+    { "name": "Mode DÉMO (données fictives)", "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/main.py", "args": ["--demo"], "console": "integratedTerminal" }
+  ]
+}

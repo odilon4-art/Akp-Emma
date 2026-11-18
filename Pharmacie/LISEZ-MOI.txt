@@ -1,0 +1,89 @@
+ORDONNANCE MOBILE PHARMACIE - VERSION PC (Python, 100 % locale, sans Internet)
+
+Stock, commandes avec code de retrait a 6 chiffres, ventes au comptoir, fiche, personnel.
+Aucun Supabase : un serveur Python integre (backend.py) + base SQLite sur votre PC.
+
+=====================================================================
+ TOUTES LES COMMANDES (PowerShell dans VS Code : Terminal > Nouveau terminal)
+=====================================================================
+UNE FOIS : Python installe (python.org, cocher "Add Python to PATH").
+IMPORTANT : le dossier doit etre HORS de OneDrive (sinon "Acces refuse" a la construction).
+
+A. Copier le projet hors de OneDrive (si vous l'avez decompresse sur le Bureau)
+     mkdir C:\dev
+     robocopy "$env:USERPROFILE\OneDrive\Desktop\Pharmacie" C:\dev\Pharmacie /E /XD build dist .venv
+     cd C:\dev\Pharmacie
+   (ou decompressez directement le ZIP dans C:\dev)
+   Ouvrir ensuite VS Code : Fichier > Ouvrir un dossier > C:\dev\Pharmacie
+
+B. Preparer l'environnement (activation)
+     python -m venv .venv
+     .\.venv\Scripts\activate          <- on doit voir (.venv) devant la ligne
+     pip install -r requirements.txt
+
+C. Essayer sans installer
+     python main.py --demo             <- DEMO (donnees fictives)
+     python main.py                    <- VERSION PC (vos vraies donnees)
+   ou dans VS Code : Ctrl+Shift+D, choisir la configuration, puis F5.
+
+D. Fabriquer le logiciel (.exe)  -  3 a 5 minutes
+     .\build.bat
+   attendre :  OK : dist\OrdonnanceMobilePharmacie.exe
+
+E. Installer sur le PC (raccourcis Bureau)
+     .\Installer.bat
+   -> deux raccourcis : "Ordonnance Mobile Pharmacie" et "... (DEMO)"
+   Desinstaller : C:\Users\<vous>\AppData\Local\OrdonnanceMobilePharmacie\Desinstaller.bat
+
+F. Mettre a jour apres une modification : .\build.bat puis .\Installer.bat
+
+REGLES : .\ devant les scripts, pas de point apres le nom ; si le terminal affiche >> appuyer sur
+Entree ; apres Ctrl+C refaire l'activation (B) ; "No module named PyInstaller" = venv non active.
+
+=====================================================================
+ DEUX MODES
+=====================================================================
+ DEMO : comptes prets (mot de passe Demo1234!)  pharmacie@demo.local (admin)  pharmacien@demo.local
+        Bouton vert "Mode demo" en bas a droite : remplit la connexion + affiche les codes de retrait de demo.
+        Donnees fictives, effacees a chaque lancement.
+ VERSION PC : "Creer un compte" -> Fiche -> Publier -> Stock (ajouter des produits) -> Personnel.
+        Bouton "Outils" -> Simulateur patient : cree une commande et affiche son code de retrait.
+        Onglet Commandes : saisir le code -> "Valider la remise".
+
+ Regles reproduites : commande payee en ligne = stock deja retire ; espece = stock retire a la remise ;
+ vente au comptoir = stock retire tout de suite ; part d'assurance calculee selon la fiche et le produit.
+
+DONNEES : C:\Users\<vous>\.ordonnance_mobile\donnees  (a sauvegarder)
+ Ce dossier est PARTAGE avec le logiciel Hopital : meme base, memes comptes. Pour que les deux
+ logiciels se synchronisent (mise a jour en direct), utiliser le meme backend.py (version du ZIP Hopital mis a jour).
+
+LIMITES : un seul ordinateur ; pas d'application patient (le simulateur la remplace) ;
+ "mot de passe oublie" par e-mail impossible (l'administrateur le change dans Personnel).
+
+NOUVEAU DESIGN (v5) : menu latéral violet avec compteurs (commandes à remettre, produits bientôt épuisés),
+ commandes en étiquettes à souche (quantité), stock bas surligné, écran de connexion refait, thème clair/sombre,
+ polices du système (fonctionne sans Internet). Style : app/theme.css (couleurs en haut du fichier).
+ Mise à jour dans C:\dev\Pharmacie : dézipper par-dessus, puis
+   .\.venv\Scripts\activate
+   python main.py --demo          (aperçu)
+   .\build.bat   puis   .\Installer.bat
+
+LOCALISATION (v13) : champ unique pour coller les coordonnees ou un lien Google Maps, controle en direct (Togo), bouton Verifier sur la carte, champs obligatoires marques.
+
+PHOTO (v14) : onglet Fiche > Photo de la pharmacie (lien HTTPS facultatif, image illustrative par defaut : app/images/pharmacie-defaut.svg).
+
+PAIEMENTS (v15) : onglet Vente en especes renomme Mode de paiement (choix du mode a chaque vente comptoir) ; modes ajoutes : Moov Money, Mixx By Yas. Cochez-les dans Fiche > Horaires et paiement.
+
+ERREUR "Could not load System.Windows.Forms" (v15) : le logiciel bascule maintenant tout seul sur le navigateur
+ (une petite fenetre "Quitter" s'affiche). Pour retrouver la fenetre integree : python -m pip install -U pywebview pythonnet
+ (ou utiliser Python 3.12), puis relancer. Sinon, rien a faire : le logiciel fonctionne dans le navigateur.
+
+CONSTRUCTION SUR LE BUREAU (v16) : build.bat cree l'environnement Python et les fichiers temporaires hors de OneDrive
+ (%LOCALAPPDATA%\om-build\pharmacie) puis copie le .exe dans dist\. Le projet peut rester sur le Bureau.
+ Si un ancien dossier .venv est abime : le supprimer (Remove-Item -Recurse -Force .venv), build.bat n'en a plus besoin.
+
+LOGICIEL PATIENT (v17) : Hopital, Pharmacie et Patient partagent la meme base sur le meme PC et se mettent a jour en direct. Demo commune : lancez les trois en mode DEMO ; patients 90111111...90444444, code 123456.
+
+DESIGN (v19) : style « CoachPro » (cadre en verre sur fond dégradé, menu latéral, grand titre, cartes douces). Couleurs : variables en tête de la section v19 de app/theme.css.
+
+FILIGRANE (v20) : logos en motif très discret derrière les écrans (section v20 de app/theme.css, variable --wm ; supprimer la section pour l'enlever).

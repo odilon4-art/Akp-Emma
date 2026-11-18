@@ -1,0 +1,104 @@
+name: Compiler les logiciels
+
+# Se lance a chaque envoi de code, ou a la main (onglet Actions > Run workflow)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  hopital:
+    name: Hopital (.exe Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Installer les dependances
+        working-directory: Hopital
+        run: python -m pip install -r requirements.txt
+      - name: Construire OrdonnanceMobile.exe
+        working-directory: Hopital
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name OrdonnanceMobile --icon icon.ico --add-data "app;app" --hidden-import backend main.py
+      - name: Preparer le dossier a telecharger
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path out/Hopital/dist | Out-Null
+          Copy-Item Hopital/dist/OrdonnanceMobile.exe out/Hopital/dist/
+          Copy-Item Hopital/icon.ico, Hopital/Installer.bat, Hopital/installer.ps1, Hopital/LISEZ-MOI.txt out/Hopital/
+          Compress-Archive -Path out/Hopital -DestinationPath Hopital-Windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Hopital-Windows
+          path: Hopital-Windows.zip
+
+  pharmacie:
+    name: Pharmacie (.exe Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Installer les dependances
+        working-directory: Pharmacie
+        run: python -m pip install -r requirements.txt
+      - name: Construire OrdonnanceMobilePharmacie.exe
+        working-directory: Pharmacie
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name OrdonnanceMobilePharmacie --icon icon.ico --add-data "app;app" --hidden-import backend main.py
+      - name: Preparer le dossier a telecharger
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path out/Pharmacie/dist | Out-Null
+          Copy-Item Pharmacie/dist/OrdonnanceMobilePharmacie.exe out/Pharmacie/dist/
+          Copy-Item Pharmacie/icon.ico, Pharmacie/Installer.bat, Pharmacie/installer.ps1, Pharmacie/LISEZ-MOI.txt out/Pharmacie/
+          Compress-Archive -Path out/Pharmacie -DestinationPath Pharmacie-Windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pharmacie-Windows
+          path: Pharmacie-Windows.zip
+
+  patient-android:
+    name: Patient (.apk Android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Construire l'APK
+        working-directory: PatientAndroid
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Patient-Android
+          path: PatientAndroid/app/build/outputs/apk/debug/app-debug.apk
+
+  publier:
+    name: Publier les fichiers (page Releases)
+    needs: [hopital, pharmacie, patient-android]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: fichiers
+          merge-multiple: true
+      - name: Renommer l'APK
+        run: mv fichiers/app-debug.apk fichiers/OrdonnanceMobile-Patient.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Version ${{ github.run_number }}
+          files: |
+            fichiers/OrdonnanceMobile-Patient.apk
+            fichiers/Hopital-Windows.zip
+            fichiers/Pharmacie-Windows.zip

@@ -1,0 +1,11 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nouveau mot de passe · Ordonnance Mobile</title>
+<style>body{font-family:system-ui,sans-serif;background:#f4f7f6;margin:0;padding:24px}.c{max-width:420px;margin:40px auto;background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 10px #0001}input,button{width:100%;box-sizing:border-box;padding:12px;margin-top:10px;font-size:16px;border-radius:8px;border:1px solid #ccc}button{background:#0a7d5a;color:#fff;border:0}#m{margin-top:12px;color:#444}</style></head><body>
+<div class="c"><h2 style="margin-top:0">Nouveau mot de passe</h2><div id="m">Vérification du lien…</div>
+<div id="f" style="display:none"><input id="p1" type="password" placeholder="Nouveau mot de passe (8 caractères minimum)" autocomplete="new-password"><input id="p2" type="password" placeholder="Répétez le mot de passe" autocomplete="new-password"><button onclick="save()">Enregistrer</button></div></div>
+<script src="local-supabase.js"></script><script>
+const sb=supabase.createClient(location.origin,'sb_publishable_wsJjuTPF3o_efMRFONly_w_YsgVFgZ8');
+const m=t=>document.getElementById('m').textContent=t,show=()=>{document.getElementById('f').style.display='block';m('Choisissez votre nouveau mot de passe.')};
+sb.auth.onAuthStateChange((e,s)=>{if(e==='PASSWORD_RECOVERY'||(e==='SIGNED_IN'&&s))show()});
+setTimeout(async()=>{const{data}=await sb.auth.getSession();if(data.session)show();else if(document.getElementById('f').style.display!=='block')m('Lien invalide ou expiré. Retournez sur la page de connexion et demandez un nouveau lien.')},2500);
+async function save(){const a=p1.value,b=p2.value;if(a.length<8)return m('8 caractères minimum');if(a!==b)return m('Les deux mots de passe sont différents');const{error}=await sb.auth.updateUser({password:a});if(error)return m('Changement impossible : '+error.message);await sb.auth.signOut();document.getElementById('f').style.display='none';m('Mot de passe modifié. Vous pouvez vous connecter.');setTimeout(()=>location.href='./',1500)}
+</script></body></html>
